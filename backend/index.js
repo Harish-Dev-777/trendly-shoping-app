@@ -10,7 +10,21 @@ const app = express();
 const prisma = new PrismaClient();
 
 // Middleware
-app.use(cors());
+const allowedOrigins = [
+  'http://localhost:3000',
+  process.env.FRONTEND_URL, // Set this in Render env vars to your Vercel URL
+];
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: true,
+}));
 app.use(express.json({ limit: '20mb' }));
 
 // Basic health check endpoint
